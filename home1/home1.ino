@@ -7,10 +7,32 @@ int RelaysPin[16] = {36,37,38,39,40,41,42,43,44,45,46,47,03,49,03,48};
 int KeysPin[14] =   {22,23,24,25,26,27,28,29,30,31,32,33,34,35};
 int States[16] = {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH};
 unsigned long Delays[16];
+unsigned long showActionDelay;
 
 int stateSensor_Light = HIGH;
 
 unsigned long delaySensor_Light = millis();
+
+uint8_t lightOn[8] = {
+	0b11111,
+	0b01110,
+	0b00000,
+	0b01010,
+	0b00100,
+	0b01010,
+	0b00000,
+	0b11111
+};
+uint8_t lightOff[8] = {
+	0b11111,
+	0b01110,
+	0b00000,
+	0b00000,
+	0b00000,
+	0b00000,
+	0b00000,
+	0b11111
+};
 
 /*byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 char server[] = "192.168.1.39";
@@ -37,10 +59,13 @@ void setup() {
 
   Serial.begin(9600);
 
-  lcd.init();                     
+  lcd.init();
   lcd.backlight();// Включаем подсветку дисплея
   lcd.clear ();
   lcd.print ("Готов");
+
+  lcd.createChar(0, lightOff);
+  lcd.createChar(1, lightOn);
 
   cnt = sizeof(RelaysPin)/ sizeof (int);
 
@@ -68,11 +93,18 @@ void setup() {
   Serial.println(" OK");
   
   cnt = sizeof(Delays)/ sizeof (unsigned long);
- 
+  showActionDelay = millis();
+
   for (a = 0; a < cnt; a++) {
     Delays[a] = millis();
   }
   
+
+  /*lcd.createChar(3, heart);  // создаём символ «сердце» в 3 ячейке памяти
+  lcd.printByte(3); // печатаем символ «сердце», находящийся в 3-ей ячейке*/
+
+  lcd.noBacklight();
+
 /*  Ethernet.begin(mac, ip);
   ethServer.begin();
   
@@ -87,32 +119,82 @@ void setup() {
 
 }
 
-void ShowState () {
-
-  lcd.clear ();
-  int a;
-  int cnt;
-  
-  cnt = sizeof(States)/ sizeof (int);
-
-  for (a = 0; a < cnt; a++) {
-    lcd.setCursor (a,0);
-    if (States[a] == LOW) {
-      lcd.print ("*");    
-    }
-    else {
-      lcd.print ("_");  
-    }
-    
+void ShowState (int keyNo = -1) {
+	  
+  if (showActionDelay > millis()) {
+	  return;
   }
 
-  lcd.setCursor (0,1);
-  lcd.print ("Temp");
-  lcd.setCursor (5,1);
-  lcd.print ("21.4");
-  lcd.setCursor (11,1);
-  lcd.print ("15:44");
+
+  lcd.clear ();
+  char messageText[16];
   
+  if (keyNo >= 0) {
+
+	  switch (keyNo)
+	  {
+		 case 36 : strcpy(messageText, "Кухня");
+		 case 37 : strcpy(messageText, "Гостинная");
+		 case 38 : strcpy(messageText, "Тамбур");
+		 case 39 : strcpy(messageText, "Сени");
+		 case 40 : strcpy(messageText, "Туалет");
+		 case 41 : strcpy(messageText, "Коридор 1эт.");
+		 case 42 : strcpy(messageText, "Лестница");
+		 case 43 : strcpy(messageText, "Коридор 2эт.");
+		 case 44 : strcpy(messageText, "Кабинет");
+		 case 45 : strcpy(messageText, "Спальня");
+		 case 46 : strcpy(messageText, "Детская");
+		 case 47 : strcpy(messageText, "Балкон");
+		 case 03 : strcpy(messageText, "Гардероб");
+		 case 49 : strcpy(messageText, "1?");
+		 case 48 : strcpy(messageText, "2?");
+
+	  default:
+		  break;
+	  }
+
+	  lcd.setCursor(0, 1);
+	  lcd.print(messageText);
+	  lcd.setCursor(0, 0);
+	  lcd.print("Переключение:");
+
+	  showActionDelay = millis() + 5000;
+	  lcd.backlight();
+
+  }
+  else {
+
+	  int a;
+	  int cnt;
+	  int onCount = 0;
+
+	  lcd.noBacklight();
+
+	  cnt = sizeof(States) / sizeof(int);
+
+	  for (a = 0; a < cnt; a++) {
+		  lcd.setCursor(a, 0);
+		  lcd.write(1);
+		  if (States[a] == LOW) {
+		  }
+		  else {
+			  lcd.write(1);
+			  onCount++;
+		  }
+
+	  }
+
+	  lcd.setCursor(0, 0);
+	  lcd.print("Потребителей: ");
+	  lcd.print(onCount);
+
+	  /*lcd.setCursor (0,1);
+	  lcd.print ("Temp");
+	  lcd.setCursor (5,1);
+	  lcd.print ("21.4");
+	  lcd.setCursor (11,1);
+	  lcd.print ("15:44");*/
+  }
 }
 
 bool checkAnalogState (int pinRead, unsigned long keyDelay, int analogLevel = _moveDetectLevel) {
