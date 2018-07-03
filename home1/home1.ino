@@ -1,8 +1,4 @@
 #include <LiquidCrystal_I2C.h>
-#include <LiquidCrystalRus_I2C.h>
-
-const int pinLightSensor = 1;
-const int _moveDetectLevel = 500;
 
 int RelaysPin[16] = {36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 03, 49, 03, 48};
 int KeysPin[14] =   {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
@@ -10,9 +6,18 @@ int States[16] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HI
 unsigned long Delays[16];
 unsigned long showActionDelay;
 
-int stateSensor_Light = HIGH;
+const int _moveDetectLevel = 160;
+const int _mainDelayDefault = 50;
+const unsigned long _delayMotionTime = 5000;
+const unsigned long _delayActionTime = 600000;
 
-unsigned long delaySensor_Light = millis();
+const int _pinMotion = 1;
+const int _pinMotionRelay = 36; 
+
+unsigned long detectMotionTime = 0;
+unsigned long detectAction;
+
+int mainDelay = 50; 
 
 uint8_t lightOn[8] = {
   0b11111,
@@ -35,27 +40,7 @@ uint8_t lightOff[8] = {
   0b11111
 };
 
-<<<<<<< HEAD
-LiquidCrystal_I2C lcd(0x27,16,2);
-=======
-/*byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-  char server[] = "192.168.1.39";
-  byte bufTCP[3];
-
-  IPAddress ip (192, 168, 1, 177);
-  IPAddress serverIp (192, 168, 1, 39);
-
-  EthernetServer ethServer(738);
-  EthernetClient ethClient;*/
-
-struct TSendData {
-  byte btOperation;
-  byte btDestination;
-  byte btState;
-};
-
-LiquidCrystalRus_I2C lcd(0x27, 16, 2);
->>>>>>> efc6a0ceae168408ae5d91f918200aff270d1aae
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup() {
 
@@ -63,6 +48,8 @@ void setup() {
   int cnt;
 
   Serial.begin(9600);
+
+  detectAction = millis();
 
   lcd.init();
   lcd.backlight();
@@ -74,18 +61,12 @@ void setup() {
 
   cnt = sizeof(RelaysPin) / sizeof (int);
 
-  Serial.print("Инициализация реле: ");
-
   for (a = 0; a < cnt; a++) {
     pinMode (RelaysPin[a], OUTPUT);
     digitalWrite (RelaysPin[a], HIGH);
     Serial.print(a);
     Serial.print(" ");
   }
-
-  Serial.println(" OK");
-
-  Serial.print("Инициализация выключателей: ");
 
   cnt = sizeof(KeysPin) / sizeof (int);
 
@@ -95,8 +76,6 @@ void setup() {
     Serial.print(" ");
   }
 
-  Serial.println(" OK");
-
   cnt = sizeof(Delays) / sizeof (unsigned long);
   showActionDelay = millis();
 
@@ -104,32 +83,40 @@ void setup() {
     Delays[a] = millis();
   }
 
-
-<<<<<<< HEAD
-
   lcd.noBacklight();
-
-
-=======
-  /*lcd.createChar(3, heart);  // создаём символ «сердце» в 3 ячейке памяти
-    lcd.printByte(3); // печатаем символ «сердце», находящийся в 3-ей ячейке*/
-
-  lcd.noBacklight();
-
-  /*  Ethernet.begin(mac, ip);
-    ethServer.begin();
-
-    ethClient.connect (serverIp, 738);
-
-    if (ethClient.connected ()) {
-    }
-
-    ethClient.write(bufTCP, 3);
-
-    Serial.println(Ethernet.localIP());*/
->>>>>>> efc6a0ceae168408ae5d91f918200aff270d1aae
 
 }
+
+void checkDelay(int pinNo, unsigned long* detectTime, bool isHigh = false)
+{
+	if (isHigh) {
+		*detectTime = millis() + _delayMotionTime;
+		digitalWrite(pinNo, HIGH);
+	}
+	else
+	{
+		if (millis() > *detectTime) {
+			digitalWrite(pinNo, LOW);
+		}
+	}
+
+}
+
+bool checkAnalogState(int pinRead, int analogLevel = _moveDetectLevel) {
+
+
+
+	bool result;
+
+	result = bool(analogRead(pinRead) > analogLevel);
+
+	if (result) {
+		detectAction = millis();
+	}
+
+	return (result);
+
+};
 
 void ShowState (int keyNo = -1) {
 
@@ -200,29 +187,8 @@ void ShowState (int keyNo = -1) {
     lcd.print("Потребителей: ");
     lcd.print(onCount);
 
-<<<<<<< HEAD
-=======
-    /*lcd.setCursor (0,1);
-      lcd.print ("Temp");
-      lcd.setCursor (5,1);
-      lcd.print ("21.4");
-      lcd.setCursor (11,1);
-      lcd.print ("15:44");*/
->>>>>>> efc6a0ceae168408ae5d91f918200aff270d1aae
   }
 }
-
-bool checkAnalogState (int pinRead, unsigned long keyDelay, int analogLevel = _moveDetectLevel) {
-
-  int curRead = 0;
-  bool timeOut = false;
-
-  curRead = analogRead (pinRead);
-  timeOut = ((millis() - keyDelay) > 5000);
-
-  return (bool(curRead > analogLevel)&timeOut);
-
-};
 
 bool checkKeyState (int pinRead, unsigned long keyDelay) {
 
@@ -254,53 +220,22 @@ void loop() {
 
   for (a = 0; a < cnt; a++) {
     if (checkKeyState (KeysPin[a], Delays[a]) == true) {
+	  detectAction = millis();
       setKeyState (RelaysPin[a], &States[a], &Delays[a]);
     };
   };
+  
+  checkDelay(_pinMotionRelay, &detectMotionTime, checkAnalogState(_pinMotion));
 
-  /*Serial.println(analogRead(1));
+  if ((millis() > detectAction)&((millis() - detectAction) > _delayActionTime)) {
+	  if (mainDelay < 1000) {
+		  mainDelay = int((millis() - detectAction) / _delayActionTime) * _mainDelayDefault;
+	  }
+  }
+  else {
+	  mainDelay = _mainDelayDefault;
+  }
 
-    if (checkKeyState (pinKey_Kitcher, delayKey_Kitcher) == true) {
-      Serial.println(stateKey_Kitcher);
-      setKeyState (pinRelay_Kitcher, &stateKey_Kitcher, &delayKey_Kitcher);
-      Serial.println(stateKey_Kitcher);
-      Serial.println("key");
-    }
-
-    if (checkAnalogState (pinLightSensor, delaySensor_Light) == true) {
-      setKeyState (pinRelay_Kitcher, &stateSensor_Light, &delaySensor_Light);
-      stateSensor_Light = HIGH;
-      stateKey_Kitcher = LOW;
-      Serial.println("sensor");
-    }
-
-    EthernetClient client = ethServer.available();
-
-    if (client) {
-
-    Serial.println("4");
-
-      Serial.println("new client: ");
-
-      while (client.connected()) {
-
-    Serial.println("5");
-
-        if (client.available() == sizeof (TSendData)) {
-
-    Serial.println("6");
-
-          int cnt = client.read(bufTCP, sizeof (TSendData));
-          Serial.println(bufTCP[0], DEC);
-          Serial.println(bufTCP[1], DEC);
-          Serial.println(bufTCP[2], DEC);
-
-        };
-
-      };
-
-    };*/
-
-  delay (30);
+  delay(mainDelay);
 
 }
