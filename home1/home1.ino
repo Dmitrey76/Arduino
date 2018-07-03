@@ -34,22 +34,6 @@ uint8_t lightOff[8] = {
 	0b11111
 };
 
-/*byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-char server[] = "192.168.1.39";
-byte bufTCP[3];
- 
-IPAddress ip (192, 168, 1, 177);
-IPAddress serverIp (192, 168, 1, 39);
-
-EthernetServer ethServer(738);
-EthernetClient ethClient;*/
-
-struct TSendData {
-  byte btOperation;
-  byte btDestination;
-  byte btState;
-};
-
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 void setup() {
@@ -60,7 +44,7 @@ void setup() {
   Serial.begin(9600);
 
   lcd.init();
-  lcd.backlight();// Включаем подсветку дисплея
+  lcd.backlight();
   lcd.clear ();
   lcd.print ("Готов");
 
@@ -100,22 +84,10 @@ void setup() {
   }
   
 
-  /*lcd.createChar(3, heart);  // создаём символ «сердце» в 3 ячейке памяти
-  lcd.printByte(3); // печатаем символ «сердце», находящийся в 3-ей ячейке*/
 
   lcd.noBacklight();
 
-/*  Ethernet.begin(mac, ip);
-  ethServer.begin();
-  
-  ethClient.connect (serverIp, 738);
 
-  if (ethClient.connected ()) {
-  }
-  
-  ethClient.write(bufTCP, 3);
-
-  Serial.println(Ethernet.localIP());*/
 
 }
 
@@ -188,12 +160,6 @@ void ShowState (int keyNo = -1) {
 	  lcd.print("Потребителей: ");
 	  lcd.print(onCount);
 
-	  /*lcd.setCursor (0,1);
-	  lcd.print ("Temp");
-	  lcd.setCursor (5,1);
-	  lcd.print ("21.4");
-	  lcd.setCursor (11,1);
-	  lcd.print ("15:44");*/
   }
 }
 
