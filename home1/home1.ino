@@ -1,11 +1,12 @@
 #include <LiquidCrystal_I2C.h>
+#include <LiquidCrystalRus_I2C.h>
 
 const int pinLightSensor = 1;
 const int _moveDetectLevel = 500;
 
-int RelaysPin[16] = {36,37,38,39,40,41,42,43,44,45,46,47,03,49,03,48};
-int KeysPin[14] =   {22,23,24,25,26,27,28,29,30,31,32,33,34,35};
-int States[16] = {HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH,HIGH};
+int RelaysPin[16] = {36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 03, 49, 03, 48};
+int KeysPin[14] =   {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
+int States[16] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
 unsigned long Delays[16];
 unsigned long showActionDelay;
 
@@ -14,26 +15,27 @@ int stateSensor_Light = HIGH;
 unsigned long delaySensor_Light = millis();
 
 uint8_t lightOn[8] = {
-	0b11111,
-	0b01110,
-	0b00000,
-	0b01010,
-	0b00100,
-	0b01010,
-	0b00000,
-	0b11111
+  0b11111,
+  0b01110,
+  0b00000,
+  0b01010,
+  0b00100,
+  0b01010,
+  0b00000,
+  0b11111
 };
 uint8_t lightOff[8] = {
-	0b11111,
-	0b01110,
-	0b00000,
-	0b00000,
-	0b00000,
-	0b00000,
-	0b00000,
-	0b11111
+  0b11111,
+  0b01110,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b11111
 };
 
+<<<<<<< HEAD
 LiquidCrystal_I2C lcd(0x27,16,2);
 =======
 /*byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
