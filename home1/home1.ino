@@ -8,9 +8,9 @@ int States[16] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HI
 unsigned long Delays[16];
 unsigned long showActionDelay;
 
-const int _moveDetectLevel = 680;
+const int _moveDetectLevel = 850;
 const int _mainDelayDefault = 50;
-const unsigned long _delayMotionTime = 3000;
+const unsigned long _delayMotionTime = 5000;
 const unsigned long _delayActionTime = 600000;
 
 const int _pinMotion = 1;
