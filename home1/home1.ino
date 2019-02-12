@@ -8,13 +8,15 @@ int States[16] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HI
 unsigned long Delays[16];
 unsigned long showActionDelay;
 
-const int _moveDetectLevel = 850;
+const int _moveDetectLevel = 677;
 const int _mainDelayDefault = 50;
 const unsigned long _delayMotionTime = 5000;
 const unsigned long _delayActionTime = 600000;
 
 const int _pinMotion = 1;
 const int _pinMotionRelay = 3; 
+const int _TopStair = 3;
+const int _BottomStair = 10;
 
 unsigned long detectMotionTime = 0;
 unsigned long detectAction;
@@ -49,7 +51,7 @@ void setup() {
   int a;
   int cnt;
 
-  Serial.begin(9600);
+ // Serial.begin(9600);
 
   detectAction = millis();
 
@@ -66,16 +68,16 @@ void setup() {
   for (a = 0; a < cnt; a++) {
     pinMode (RelaysPin[a], OUTPUT);
     digitalWrite (RelaysPin[a], HIGH);
-    Serial.print(a);
-    Serial.print(" ");
+ //   Serial.print(a);
+ //   Serial.print(" ");
   }
 
   cnt = sizeof(KeysPin) / sizeof (int);
 
   for (a = 0; a < cnt; a++) {
     pinMode (KeysPin[a], INPUT);
-    Serial.print(a);
-    Serial.print(" ");
+ //   Serial.print(a);
+ //   Serial.print(" ");
   }
 
   cnt = sizeof(Delays) / sizeof (unsigned long);
@@ -149,19 +151,27 @@ void checkDelay(int pinNo, unsigned long* detectTime, bool isHigh = false)
 
 bool checkAnalogState(int pinRead, int analogLevel = _moveDetectLevel) {
 
-	bool result;
+  if (States[_TopStair] == LOW || States[_BottomStair] == LOW) {
+    return false;  
+  }
+	else
+  {
+  	bool result;
 
-	result = bool(analogRead(pinRead) > analogLevel);
-	if (States[_MotionPinNo] == LOW) {
-	  result = false;
-	}
+	  result = bool(analogRead(pinRead) > analogLevel);
+	  if (States[_MotionPinNo] == LOW) {
+	    result = false;
+  	}
 
-	if (result) {
-		detectAction = millis();
-	}
+ //   Serial.println(analogRead(pinRead));
 
-	return (result);
+	  if (result) {
+	  	detectAction = millis();
+	  }
 
+	  return (result);
+  }
+  
 };
 
 bool checkKeyState (int pinRead, unsigned long keyDelay) {
