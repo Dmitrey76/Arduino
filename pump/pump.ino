@@ -15,6 +15,8 @@ unsigned long showTime;
 int preasureValue = 0; 
 int prevPreasureValue = 0; 
 
+unsigned long workTime;
+
 int minPreasure = 100;
 int maxPreasure = 135; //  из 1023
 
@@ -25,7 +27,7 @@ void setup() {
 
   int a;
 
-  Serial.begin(9600);
+  /* Serial.begin(9600); */
 
   for (a = 0; a < _gaugeSize; a++) {
     pinMode (_gaugePins[a], OUTPUT);
@@ -38,6 +40,7 @@ void setup() {
   startWork = 0;
   workInProgress = false;
   repeatWork = false;
+  workTime = _workTime;
 
 }
 
@@ -50,8 +53,7 @@ void ShowPreasure (int value) {
   for (a = 0; a < _gaugeSize; a++) {
     
     digitalWrite (_gaugePins[a], ! (minPreasure + (a * stepG) >= value) );
-    Serial.print ("Шкала: ");
-    Serial.println (minPreasure + a * stepG);
+    
   }
 
   showTime = millis ();
@@ -62,9 +64,6 @@ void loop() {
 
   prevPreasureValue = preasureValue;
   preasureValue = analogRead (_sensorPin);
-  
-//  Serial.print("Давление: ");
-//  Serial.println(preasureValue);
 
   if ( abs(preasureValue - prevPreasureValue) > _deltaPreasure ) {
     ShowPreasure (preasureValue);
@@ -75,26 +74,29 @@ void loop() {
     workInProgress = true;
     startWork = millis ();
     repeatWork = false;
-    Serial.println ("on");
+    /*Serial.println ("on");
     Serial.println (preasureValue);
-    Serial.println (millis () - startWork);
+    Serial.println (millis () - startWork);*/
   };
 
-  if (workInProgress & ((millis () - startWork) > _workTime)) {
+  if (workInProgress & ((millis () - startWork) > workTime)) {
     digitalWrite (_relayPin, HIGH);
     workInProgress = false;
     repeatWork = true;
     startWork = millis ();
-    Serial.println (preasureValue);
+    if (workTime < (_workTime * 2)) {
+      workTime = workTime + 1000;
+    }
+    /*Serial.println (preasureValue);
     Serial.println ((millis () - startWork));
-    Serial.println ("off - TO");
+    Serial.println ("off - TO");*/
   };
 
   if (workInProgress & (preasureValue > maxPreasure)) {
     digitalWrite (_relayPin, HIGH);
     workInProgress = false;
-    Serial.println (preasureValue);
-    Serial.println ("off");
+    /*Serial.println (preasureValue);
+    Serial.println ("off");*/
   };
   
   if (!workInProgress & !repeatWork & (millis() - showTime > _delayShowTime)) {
