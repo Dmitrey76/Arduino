@@ -21,8 +21,8 @@ int prevPreasureValue = 0;
 
 unsigned long deltaCheck; 
 
-int minPreasure = 247;
-int maxPreasure = 297; //  из 1023
+int minPreasure = 240;
+int maxPreasure = 300; //  из 1023
 int tryCount = 0;
 
 bool workInProgress = false;
