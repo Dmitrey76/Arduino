@@ -7,10 +7,10 @@ const int _deltaPreasure = 7;
 const int _maxTrysCount = 9999;
 
 const unsigned long _delayShowTime = 3000;
-const unsigned long _workTime =  20000;
-const unsigned long _delayTime = 2000;
-const unsigned long _checkTime = 3600000;
-const unsigned long _checkTimeDelay = 3000;
+const unsigned long _workTime =  30000;
+const unsigned long _delayTime = 5000;
+const unsigned long _checkTime = 7200000;
+const unsigned long _checkTimeDelay = 2000;
 
 unsigned long startWork;
 unsigned long showTime;
@@ -21,8 +21,8 @@ int prevPreasureValue = 0;
 
 unsigned long deltaCheck; 
 
-int minPreasure = 237;
-int maxPreasure = 275; //  из 1023
+int minPreasure = 247;
+int maxPreasure = 297; //  из 1023
 int tryCount = 0;
 
 bool workInProgress = false;
@@ -32,7 +32,7 @@ void setup() {
 
   int a;
 
-//  Serial.begin(9600);
+  //Serial.begin(9600);
 
   for (a = 0; a < _gaugeSize; a++) {
     pinMode (_gaugePins[a], OUTPUT);
@@ -111,10 +111,10 @@ void loop() {
     tryCount = 0;
   };
 
-  if (((millis () - checkTime) > _checkTime) & (preasureValue <= maxPreasure) & !workInProgress) {
+  if (((millis () - checkTime) > _checkTime) & (preasureValue < maxPreasure) & !workInProgress) {
     repeatWork = true;    
     checkTime = millis ();
-    startWork = checkTime + _delayTime;
+    startWork = checkTime + _delayTime;    
     //Serial.print ("check: ");
     //Serial.println (checkTime);
   }
