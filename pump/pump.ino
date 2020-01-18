@@ -1,4 +1,4 @@
-int _gaugePins[10] = {11, 10,9,8,7,6,5,4,3,2};
+int _gaugePins[10] = {11,10,9,8,7,6,5,4,3,2};
 const int _gaugeSize = 10;
 
 const int _relayPin = 12;
@@ -7,10 +7,10 @@ const int _deltaPreasure = 7;
 const int _maxTrysCount = 9999;
 
 const unsigned long _delayShowTime = 3000;
-const unsigned long _workTime =  30000;
+const unsigned long _workTime =  60000;
 const unsigned long _delayTime = 5000;
-const unsigned long _checkTime = 7200000;
-const unsigned long _checkTimeDelay = 2000;
+//const unsigned long _checkTime = 14400000;
+//const unsigned long _checkTimeDelay = 2000;
 
 unsigned long startWork;
 unsigned long showTime;
@@ -21,8 +21,8 @@ int prevPreasureValue = 0;
 
 unsigned long deltaCheck; 
 
-int minPreasure = 240;
-int maxPreasure = 300; //  из 1023
+int minPreasure = 242;
+int maxPreasure = 302; //  из 1023
 int tryCount = 0;
 
 bool workInProgress = false;
@@ -101,7 +101,7 @@ void loop() {
     tryCount++;
   };
 
-  if ((workInProgress & (preasureValue > maxPreasure)) & ((millis () - checkTime) > _checkTimeDelay)) {
+  if ((workInProgress & (preasureValue > maxPreasure)) ) {
     digitalWrite (_relayPin, HIGH);
     workInProgress = false;
  //   Serial.println (preasureValue);
@@ -111,13 +111,13 @@ void loop() {
     tryCount = 0;
   };
 
-  if (((millis () - checkTime) > _checkTime) & (preasureValue < maxPreasure) & !workInProgress) {
+  /*if (((millis () - checkTime) > _checkTime) & (preasureValue < maxPreasure) & !workInProgress) {
     repeatWork = true;    
     checkTime = millis ();
     startWork = checkTime + _delayTime;    
     //Serial.print ("check: ");
     //Serial.println (checkTime);
-  }
+  }*/
     
   if (workInProgress || repeatWork) {
     ShowPreasure (preasureValue);
