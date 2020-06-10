@@ -1,8 +1,24 @@
 #include <LiquidCrystal_I2C.h>
 
 int RelaysPin[16] = {36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 03, 49, 03, 48};
-int KeysPin[14] =   {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
+int KeysPin[14] =   {32, 33, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 34, 35};
 int _MotionPinNo = 12;
+
+//36-32
+//37-33
+//38-22 
+//39-23
+//40-24
+//41-25
+//42-26
+//43-27
+//44-28
+//45-29
+//46-30
+//47-31
+//45-29
+//49-35 
+//03-34 
 
 int States[16] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
 unsigned long Delays[16];
@@ -65,7 +81,7 @@ void setup() {
 
   for (a = 0; a < cnt; a++) {
     pinMode (RelaysPin[a], OUTPUT);
-    digitalWrite (RelaysPin[a], HIGH);
+    digitalWrite (RelaysPin[a], HIGH); // HIGH
     Serial.print(a);
     Serial.print(" ");
   }
@@ -128,39 +144,39 @@ void checkDelay(int pinNo, unsigned long* detectTime, bool isHigh = false)
 
   int state = States[_MotionPinNo];
    
-	if (isHigh) {
-		*detectTime = millis() + _delayMotionTime;
-		digitalWrite(pinNo, LOW);
+  if (isHigh) {
+    *detectTime = millis() + _delayMotionTime;
+    digitalWrite(pinNo, LOW);
     States[_MotionPinNo] = LOW;
     ShowState (pinNo);
     States[_MotionPinNo] = state;
 
-	}
-	else
-	{
-		if (millis() > *detectTime) {
-			if (States[_MotionPinNo] == HIGH) {
-       	digitalWrite(pinNo, HIGH);
-			}  
-		}
-	}
+  }
+  else
+  {
+    if (millis() > *detectTime) {
+      if (States[_MotionPinNo] == HIGH) {
+        digitalWrite(pinNo, HIGH);
+      }  
+    }
+  }
 
 }
 
 bool checkAnalogState(int pinRead, int analogLevel = _moveDetectLevel) {
 
-	bool result;
+  bool result;
 
-	result = bool(analogRead(pinRead) > analogLevel);
-	if (States[_MotionPinNo] == LOW) {
-	  result = false;
-	}
+  result = bool(analogRead(pinRead) > analogLevel);
+  if (States[_MotionPinNo] == LOW) {
+    result = false;
+  }
 
-	if (result) {
-		detectAction = millis();
-	}
+  if (result) {
+    detectAction = millis();
+  }
 
-	return (result);
+  return (result);
 
 };
 
@@ -194,7 +210,7 @@ void loop() {
 
   for (a = 0; a < cnt; a++) {
     if (checkKeyState (KeysPin[a], Delays[a]) == true) {
-	    detectAction = millis();
+      detectAction = millis();
       setKeyState (RelaysPin[a], &States[a], &Delays[a]);
     };
   };
@@ -206,12 +222,12 @@ void loop() {
     checkDelay(_pinMotionRelay, &detectMotionTime);
 
   if ((millis() > detectAction)&((millis() - detectAction) > _delayActionTime)) {
-	  if (mainDelay < 1000) {
-		  mainDelay = int((millis() - detectAction) / _delayActionTime) * _mainDelayDefault;
-	  }
+    if (mainDelay < 1000) {
+      mainDelay = int((millis() - detectAction) / _delayActionTime) * _mainDelayDefault;
+    }
   }
   else {
-	  mainDelay = _mainDelayDefault;
+    mainDelay = _mainDelayDefault;
   }
 
   if (showActionDelay < millis()) {
