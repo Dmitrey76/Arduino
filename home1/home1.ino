@@ -1,5 +1,3 @@
-#include <LiquidCrystal_I2C.h>
-
 int RelaysPin[16] = {36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 03, 49, 03, 48};
 int KeysPin[14] =   {32, 33, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 34, 35};
 int _MotionPinNo = 12;
@@ -24,12 +22,12 @@ int States[16] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HI
 unsigned long Delays[16];
 unsigned long showActionDelay;
 
-const int _moveDetectLevel = 850;
+const int _moveDetectLevel = 670;
 const int _mainDelayDefault = 50;
 const unsigned long _delayMotionTime = 5000;
 const unsigned long _delayActionTime = 600000;
 
-const int _pinMotion = 1;
+const int _pinMotion = 3;
 const int _pinMotionRelay = 3; 
 
 unsigned long detectMotionTime = 0;
@@ -58,7 +56,7 @@ uint8_t lightOff[8] = {
   0b11111
 };
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+//LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup() {
 
@@ -69,13 +67,13 @@ void setup() {
 
   detectAction = millis();
 
-  lcd.init();
+  /*lcd.init();
   lcd.backlight();
   lcd.clear ();
   lcd.print ("Ready");
 
   lcd.createChar(0, lightOff);
-  lcd.createChar(1, lightOn);
+  lcd.createChar(1, lightOn);*/
 
   cnt = sizeof(RelaysPin) / sizeof (int);
 
@@ -101,11 +99,11 @@ void setup() {
     Delays[a] = millis();
   }
 
-  lcd.backlight();
+//  lcd.backlight();
 
 }
 
-void ShowState (int keyNo = -1) {
+/*void ShowState (int keyNo = -1) {
 
   lcd.clear ();
   lcd.setCursor(0, 1);
@@ -137,7 +135,7 @@ void ShowState (int keyNo = -1) {
   lcd.print("Dvs: ");
   lcd.print(onCount);
 
-}
+}*/
 
 void checkDelay(int pinNo, unsigned long* detectTime, bool isHigh = false)
 {
@@ -148,7 +146,7 @@ void checkDelay(int pinNo, unsigned long* detectTime, bool isHigh = false)
     *detectTime = millis() + _delayMotionTime;
     digitalWrite(pinNo, LOW);
     States[_MotionPinNo] = LOW;
-    ShowState (pinNo);
+//    ShowState (pinNo);
     States[_MotionPinNo] = state;
 
   }
@@ -197,7 +195,7 @@ void setKeyState (int pinWrite, int* stateKey, unsigned long* keyDelay) {
   *stateKey = !(*stateKey);
   digitalWrite(pinWrite, *stateKey);
   *keyDelay = millis ();
-  ShowState (pinWrite);
+//  ShowState (pinWrite);
 
 }
 
@@ -230,9 +228,9 @@ void loop() {
     mainDelay = _mainDelayDefault;
   }
 
-  if (showActionDelay < millis()) {
+  /*if (showActionDelay < millis()) {
     lcd.noBacklight();
-  }
+  }*/
 
   delay(mainDelay);
 
